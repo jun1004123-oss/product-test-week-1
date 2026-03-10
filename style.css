@@ -1,1 +1,163 @@
-/* Add styles here */
+@layer base, layout, components, utilities;
+
+@layer base {
+  :root {
+    --bg-color: oklch(0.98 0.01 240);
+    --primary-color: oklch(0.6 0.25 240);
+    --secondary-color: oklch(0.45 0.2 300);
+    --text-color: oklch(0.2 0.05 240);
+    --card-bg: rgba(255, 255, 255, 0.85);
+    --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    --glow: 0 0 15px rgba(255, 255, 255, 0.5);
+
+    /* Lotto Ball Colors */
+    --ball-1-10: oklch(0.85 0.2 80);  /* Yellowish */
+    --ball-11-20: oklch(0.65 0.2 240); /* Bluish */
+    --ball-21-30: oklch(0.65 0.25 20); /* Reddish */
+    --ball-31-40: oklch(0.7 0.05 240); /* Grayish */
+    --ball-41-45: oklch(0.75 0.2 150); /* Greenish */
+  }
+
+  body {
+    margin: 0;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background: var(--bg-color);
+    color: var(--text-color);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-image: 
+      radial-gradient(at 0% 0%, oklch(0.9 0.05 300 / 0.1) 0, transparent 50%), 
+      radial-gradient(at 100% 0%, oklch(0.9 0.05 200 / 0.1) 0, transparent 50%),
+      url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3%3Ffilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    background-blend-mode: overlay;
+  }
+}
+
+@layer components {
+  .app-container {
+    width: 90%;
+    max-width: 600px;
+    padding: 2rem;
+    background: var(--card-bg);
+    backdrop-filter: blur(10px);
+    border-radius: 2rem;
+    box-shadow: var(--shadow);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    text-align: center;
+    animation: fadeIn 0.8s ease-out;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  h1 {
+    font-size: 2.5rem;
+    font-weight: 800;
+    margin-bottom: 2rem;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: -0.05rem;
+  }
+
+  button.generate-btn {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    border: none;
+    padding: 1rem 2.5rem;
+    font-size: 1.25rem;
+    font-weight: 700;
+    border-radius: 1rem;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    margin-bottom: 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  button.generate-btn:hover {
+    transform: scale(1.05) translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+  }
+
+  button.generate-btn:active {
+    transform: scale(0.95);
+  }
+
+  button.generate-btn::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 70%);
+    transition: 0.5s;
+    opacity: 0;
+  }
+
+  button.generate-btn:hover::after {
+    opacity: 1;
+    transform: translate(25%, 25%);
+  }
+
+  .balls-display {
+    display: flex;
+    justify-content: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin-bottom: 2rem;
+    min-height: 80px;
+  }
+
+  .history-container {
+    margin-top: 2rem;
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
+    padding-top: 1.5rem;
+    text-align: left;
+  }
+
+  .history-container h2 {
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+    color: oklch(0.5 0.05 240);
+  }
+
+  .history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    max-height: 200px;
+    overflow-y: auto;
+    padding-right: 0.5rem;
+  }
+
+  .history-item {
+    display: flex;
+    gap: 0.5rem;
+    background: rgba(0, 0, 0, 0.02);
+    padding: 0.5rem 1rem;
+    border-radius: 0.75rem;
+    font-size: 0.9rem;
+    animation: slideIn 0.3s ease-out;
+  }
+
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateX(-10px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  /* Custom Scrollbar */
+  .history-list::-webkit-scrollbar {
+    width: 6px;
+  }
+  .history-list::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+  }
+}

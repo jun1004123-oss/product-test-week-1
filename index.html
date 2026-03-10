@@ -1,14 +1,300 @@
 <!doctype html>
-<html lang="en">
+<html lang="ko">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Hello World</title>
-  <link href='/style.css' rel='stylesheet'>
+  <title>로또 6/45 프리미엄 생성기</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;700;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-color: oklch(0.98 0.01 240);
+      --primary: oklch(0.6 0.25 240);
+      --secondary: oklch(0.5 0.2 300);
+      --accent: oklch(0.7 0.2 40);
+      --card-bg: rgba(255, 255, 255, 0.8);
+      
+      /* Lotto Ball Colors (Official) */
+      --ball-yellow: #fbc400; /* 1-10 */
+      --ball-blue: #69c8f2;   /* 11-20 */
+      --ball-red: #ff7272;    /* 21-30 */
+      --ball-gray: #aaa;      /* 31-40 */
+      --ball-green: #b0d840;   /* 41-45 */
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Pretendard', sans-serif;
+      background: var(--bg-color);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-image: 
+        radial-gradient(circle at 10% 20%, oklch(0.9 0.1 240 / 0.15) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, oklch(0.9 0.1 300 / 0.15) 0%, transparent 40%),
+        url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3%3Ffilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    }
+
+    .container {
+      width: 90%;
+      max-width: 500px;
+      padding: 2.5rem;
+      background: var(--card-bg);
+      backdrop-filter: blur(20px);
+      border-radius: 2.5rem;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    h1 {
+      font-size: 2.2rem;
+      font-weight: 900;
+      margin-bottom: 0.5rem;
+      color: oklch(0.3 0.05 240);
+      letter-spacing: -1px;
+    }
+
+    p.subtitle {
+      color: oklch(0.5 0.05 240);
+      margin-bottom: 2.5rem;
+      font-size: 1rem;
+    }
+
+    .ball-container {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 2.5rem;
+      min-height: 60px;
+      perspective: 1000px;
+    }
+
+    .lotto-ball {
+      width: 54px;
+      height: 54px;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: white;
+      font-weight: 800;
+      font-size: 1.3rem;
+      box-shadow: 
+        inset -4px -4px 10px rgba(0,0,0,0.2),
+        0 8px 15px rgba(0,0,0,0.15);
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+      transform: scale(0) rotate(-180deg);
+      animation: ball-appear 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+
+    @keyframes ball-appear {
+      to { transform: scale(1) rotate(0deg); }
+    }
+
+    .generate-btn {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white;
+      border: none;
+      padding: 1.2rem 3rem;
+      font-size: 1.3rem;
+      font-weight: 800;
+      border-radius: 1.2rem;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      margin-bottom: 2rem;
+    }
+
+    .generate-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+      filter: brightness(1.1);
+    }
+
+    .generate-btn:active {
+      transform: translateY(0) scale(0.98);
+    }
+
+    .history {
+      text-align: left;
+      border-top: 1px solid rgba(0,0,0,0.05);
+      padding-top: 1.5rem;
+    }
+
+    .history h2 {
+      font-size: 1rem;
+      color: oklch(0.4 0.05 240);
+      margin-bottom: 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .history-list {
+      max-height: 150px;
+      overflow-y: auto;
+      padding-right: 5px;
+    }
+
+    .history-item {
+      display: flex;
+      align-items: center;
+      background: rgba(255,255,255,0.5);
+      padding: 0.8rem;
+      border-radius: 1rem;
+      margin-bottom: 0.5rem;
+      font-size: 0.9rem;
+      animation: fadeIn 0.4s ease-out forwards;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .history-balls {
+      display: flex;
+      gap: 5px;
+      margin-left: auto;
+    }
+
+    .mini-ball {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      font-size: 0.7rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: white;
+      font-weight: 700;
+    }
+
+    /* Scrollbar */
+    .history-list::-webkit-scrollbar { width: 4px; }
+    .history-list::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 10px; }
+
+    /* Confetti Placeholder */
+    #confetti-canvas {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 10;
+    }
+  </style>
 </head>
 <body>
-  <h1>Hello, world!</h1>
-  <button onclick="console.log('hello');">Press me</button>
-  <script defer type="text/javascript" src="/main.js"></script>
+
+  <div class="container">
+    <canvas id="confetti-canvas"></canvas>
+    <h1>LOTTO 6/45</h1>
+    <p class="subtitle">오늘의 행운을 잡으세요!</p>
+
+    <div class="ball-container" id="ball-container">
+      <!-- Balls will be injected here -->
+      <div style="color: #ccc; font-weight: 500;">번호를 생성해주세요</div>
+    </div>
+
+    <button class="generate-btn" id="generate-btn">번호 자동 생성</button>
+
+    <div class="history">
+      <h2>최근 생성 기록 <span id="clear-history" style="cursor:pointer; font-size:0.8rem; color:var(--accent);">지우기</span></h2>
+      <div class="history-list" id="history-list">
+        <!-- History will be injected here -->
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <script>
+    const ballContainer = document.getElementById('ball-container');
+    const generateBtn = document.getElementById('generate-btn');
+    const historyList = document.getElementById('history-list');
+    const clearHistoryBtn = document.getElementById('clear-history');
+
+    let history = JSON.parse(localStorage.getItem('lotto_history')) || [];
+
+    function getBallColor(num) {
+      if (num <= 10) return 'var(--ball-yellow)';
+      if (num <= 20) return 'var(--ball-blue)';
+      if (num <= 30) return 'var(--ball-red)';
+      if (num <= 40) return 'var(--ball-gray)';
+      return 'var(--ball-green)';
+    }
+
+    function generateLottoNumbers() {
+      const numbers = new Set();
+      while(numbers.size < 6) {
+        numbers.add(Math.floor(Math.random() * 45) + 1);
+      }
+      return Array.from(numbers).sort((a, b) => a - b);
+    }
+
+    async function displayNumbers(numbers) {
+      ballContainer.innerHTML = '';
+      for (let i = 0; i < numbers.length; i++) {
+        const ball = document.createElement('div');
+        ball.className = 'lotto-ball';
+        ball.style.backgroundColor = getBallColor(numbers[i]);
+        ball.style.animationDelay = `${i * 0.1}s`;
+        ball.textContent = numbers[i];
+        ballContainer.appendChild(ball);
+        await new Promise(r => setTimeout(r, 100));
+      }
+      
+      // Celebrate!
+      confetti({
+        particleCount: 100,
+        spread: 70,
+        origin: { y: 0.6 },
+        colors: ['#fbc400', '#69c8f2', '#ff7272', '#b0d840']
+      });
+    }
+
+    function updateHistoryUI() {
+      historyList.innerHTML = history.map((item, idx) => `
+        <div class="history-item" style="animation-delay: ${idx * 0.05}s">
+          <span style="color: #999; font-size: 0.8rem;">${item.time}</span>
+          <div class="history-balls">
+            ${item.numbers.map(n => `
+              <div class="mini-ball" style="background-color: ${getBallColor(n)}">${n}</div>
+            `).join('')}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    generateBtn.addEventListener('click', async () => {
+      generateBtn.disabled = true;
+      const nums = generateLottoNumbers();
+      
+      await displayNumbers(nums);
+      
+      const now = new Date();
+      const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
+      
+      history.unshift({ numbers: nums, time: timeStr });
+      history = history.slice(0, 20); // Keep last 20
+      localStorage.setItem('lotto_history', JSON.stringify(history));
+      
+      updateHistoryUI();
+      generateBtn.disabled = false;
+    });
+
+    clearHistoryBtn.addEventListener('click', () => {
+      history = [];
+      localStorage.removeItem('lotto_history');
+      updateHistoryUI();
+    });
+
+    // Initial Load
+    updateHistoryUI();
+  </script>
 </body>
 </html>

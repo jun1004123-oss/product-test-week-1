@@ -209,10 +209,93 @@
         <!-- History will be injected here -->
       </div>
     </div>
+
+    <!-- Affiliate Inquiry Form Section -->
+    <div class="affiliate-section">
+      <h3>🤝 제휴 및 비즈니스 문의</h3>
+      <p style="font-size: 0.85rem; color: #666; margin-bottom: 1.5rem;">함께 성장할 파트너를 찾고 있습니다.</p>
+      
+      <form action="https://formspree.io/f/xlgpjdqy" method="POST" id="affiliate-form">
+        <div class="form-group">
+          <input type="text" name="name" placeholder="성함 / 담당자명" required>
+        </div>
+        <div class="form-group">
+          <input type="email" name="_replyto" placeholder="이메일 주소" required>
+        </div>
+        <div class="form-group">
+          <input type="text" name="company" placeholder="업체명 / 웹사이트">
+        </div>
+        <div class="form-group">
+          <textarea name="message" rows="3" placeholder="문의 내용을 입력해주세요" required></textarea>
+        </div>
+        <button type="submit" class="submit-btn">문의 보내기</button>
+      </form>
+      <div id="form-status" style="margin-top: 1rem; font-size: 0.85rem; display: none;"></div>
+    </div>
   </div>
+
+  <style>
+    /* New Form Styles */
+    .affiliate-section {
+      margin-top: 3rem;
+      padding-top: 2rem;
+      border-top: 1px dashed rgba(0,0,0,0.1);
+      text-align: left;
+    }
+    
+    .affiliate-section h3 {
+      font-size: 1.1rem;
+      margin-bottom: 0.3rem;
+      color: oklch(0.3 0.05 240);
+    }
+
+    .form-group {
+      margin-bottom: 0.8rem;
+    }
+
+    .form-group input, .form-group textarea {
+      width: 100%;
+      padding: 0.8rem 1rem;
+      border-radius: 0.8rem;
+      border: 1px solid rgba(0,0,0,0.05);
+      background: rgba(255,255,255,0.6);
+      font-family: inherit;
+      font-size: 0.9rem;
+      box-sizing: border-box;
+      transition: all 0.2s;
+    }
+
+    .form-group input:focus, .form-group textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      background: white;
+      box-shadow: 0 0 0 3px oklch(0.6 0.25 240 / 0.1);
+    }
+
+    .submit-btn {
+      width: 100%;
+      padding: 0.9rem;
+      background: oklch(0.3 0.05 240);
+      color: white;
+      border: none;
+      border-radius: 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .submit-btn:hover {
+      background: oklch(0.2 0.05 240);
+      transform: translateY(-1px);
+    }
+
+    .success-msg { color: #2ecc71; font-weight: 600; }
+    .error-msg { color: #e74c3c; font-weight: 600; }
+  </style>
 
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
   <script>
+    // Existing Lotto Logic ...
     const ballContainer = document.getElementById('ball-container');
     const generateBtn = document.getElementById('generate-btn');
     const historyList = document.getElementById('history-list');
@@ -291,6 +374,44 @@
       history = [];
       localStorage.removeItem('lotto_history');
       updateHistoryUI();
+    });
+
+    // Affiliate Form Handling
+    const affiliateForm = document.getElementById('affiliate-form');
+    const formStatus = document.getElementById('form-status');
+
+    affiliateForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData(affiliateForm);
+      const submitBtn = affiliateForm.querySelector('.submit-btn');
+      
+      submitBtn.disabled = true;
+      submitBtn.innerText = '전송 중...';
+      formStatus.style.display = 'block';
+      formStatus.innerText = '메시지를 보내는 중입니다...';
+      formStatus.className = '';
+
+      try {
+        const response = await fetch(affiliateForm.action, {
+          method: 'POST',
+          body: formData,
+          headers: { 'Accept': 'application/json' }
+        });
+        
+        if (response.ok) {
+          formStatus.innerText = '성공적으로 전송되었습니다! 곧 연락드리겠습니다.';
+          formStatus.className = 'success-msg';
+          affiliateForm.reset();
+        } else {
+          throw new Error();
+        }
+      } catch (error) {
+        formStatus.innerText = '전송에 실패했습니다. 다시 시도해주세요.';
+        formStatus.className = 'error-msg';
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerText = '문의 보내기';
+      }
     });
 
     // Initial Load
